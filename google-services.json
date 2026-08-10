@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "595013417103",
+    "project_id": "ultra-mobile-652ff",
+    "storage_bucket": "ultra-mobile-652ff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595013417103:android:c396c877461bb43aa298fa",
+        "android_client_info": {
+          "package_name": "lk.randika.ultramobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDz9HwCuzvv8q9zQbxIPPvZ14nHQEQUKI0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
