@@ -9,6 +9,7 @@ import { toast } from "sonner"
 import { IconArrowLeft, IconPlus, IconTrash, IconUpload, IconX } from "@tabler/icons-react"
 import Link from "next/link"
 import Image from "next/image"
+import { formatImageUrl } from "@/lib/utils"
 
 type Category = { id: string; name: string }
 type AttributeValue = string
@@ -346,7 +347,7 @@ export default function AddProductPage() {
                   <div className="grid grid-cols-2 gap-2">
                     {images.map((url, i) => (
                       <div key={i} className="relative group rounded-lg overflow-hidden bg-muted aspect-square">
-                        <Image src={url} alt={`Image ${i + 1}`} fill className="object-cover" />
+                        <Image src={formatImageUrl(url)} alt={`Image ${i + 1}`} fill className="object-cover" unoptimized />
                         <button
                           onClick={() => setImages((prev) => prev.filter((_, j) => j !== i))}
                           className="absolute top-1 right-1 p-1 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"

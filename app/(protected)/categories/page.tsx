@@ -6,7 +6,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { IconPlus, IconTrash, IconEdit, IconX, IconCheck } from "@tabler/icons-react"
-import Image from "next/image"
+import { ImageWithFallback } from "@/components/ui/image-with-fallback"
 
 type Category = {
   id: string
@@ -166,13 +166,7 @@ export default function CategoriesPage() {
               categories.map((cat) => (
                 <div key={cat.id} className="flex items-center gap-4 p-4 border-b last:border-0 hover:bg-muted/20 transition-colors">
                   <div className="h-12 w-12 rounded-lg bg-muted overflow-hidden flex-shrink-0">
-                    {cat.imageUrl ? (
-                      <Image src={cat.imageUrl} alt={cat.name} width={48} height={48} className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center text-muted-foreground text-lg font-bold">
-                        {cat.name[0]?.toUpperCase()}
-                      </div>
-                    )}
+                    <ImageWithFallback src={cat.imageUrl} alt={cat.name} width={48} height={48} />
                   </div>
 
                   {editId === cat.id ? (

@@ -15,7 +15,7 @@ import {
   IconEye,
   IconEyeOff,
 } from "@tabler/icons-react"
-import Image from "next/image"
+import { ImageWithFallback } from "@/components/ui/image-with-fallback"
 
 type Product = {
   id: string
@@ -190,19 +190,7 @@ export default function ProductsPage() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="h-12 w-12 rounded-lg bg-muted overflow-hidden flex-shrink-0">
-                              {p.images?.[0] ? (
-                                <Image
-                                  src={p.images[0]}
-                                  alt={p.title}
-                                  width={48}
-                                  height={48}
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
-                                  IMG
-                                </div>
-                              )}
+                              <ImageWithFallback src={p.images?.[0]} alt={p.title} width={48} height={48} />
                             </div>
                             <div>
                               <p className="font-medium leading-tight">{p.title}</p>
