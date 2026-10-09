@@ -6,6 +6,7 @@ export async function GET() {
     const snapshot = await adminDb.collection("categories").orderBy("name", "asc").get();
     const categories = snapshot.docs.map((doc) => ({
       id: doc.id,
+      categoryId: doc.data().categoryId || doc.id,
       ...doc.data(),
     }));
     return NextResponse.json({ success: true, categories });
@@ -21,13 +22,15 @@ export async function POST(req: NextRequest) {
     if (!body.name?.trim()) {
       return NextResponse.json({ success: false, error: "Name is required" }, { status: 400 });
     }
+    const docRef = adminDb.collection("categories").doc();
     const data = {
+      categoryId: docRef.id,
       name: body.name.trim(),
       imageUrl: body.imageUrl?.trim() || "",
       productCount: 0,
       createdAt: new Date().toISOString(),
     };
-    const docRef = await adminDb.collection("categories").add(data);
+    await docRef.set(data);
     return NextResponse.json({ success: true, id: docRef.id, ...data });
   } catch (error) {
     console.error("Error creating category:", error);
@@ -40,6 +43,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const { id, ...updateData } = body;
     if (!id) return NextResponse.json({ success: false, error: "ID required" }, { status: 400 });
+    updateData.categoryId = id;
     updateData.updatedAt = new Date().toISOString();
     await adminDb.collection("categories").doc(id).update(updateData);
     return NextResponse.json({ success: true, id, ...updateData });

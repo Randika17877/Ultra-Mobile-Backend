@@ -34,12 +34,14 @@ export async function POST(req: NextRequest) {
     // Resolve category details from Firestore
     let categoryName = "";
     let internalCategoryId = "";
-    if (body.categoryId) {
-      const catDoc = await adminDb.collection("categories").doc(body.categoryId).get();
+    const categoryDocId = body.categoryId || "";
+
+    if (categoryDocId) {
+      const catDoc = await adminDb.collection("categories").doc(categoryDocId).get();
       if (catDoc.exists) {
         const catData = catDoc.data();
         categoryName = catData?.name || "";
-        internalCategoryId = catData?.categoryId || "";
+        internalCategoryId = catData?.categoryId || catDoc.id;
       }
     }
 
@@ -51,8 +53,8 @@ export async function POST(req: NextRequest) {
       description: body.description || "",
       price: Number(body.price) || 0,
       stockCount: Number(body.stockCount) || 0,
-      categoryId: internalCategoryId || body.categoryId || "",
-      categoryDocId: body.categoryId || "",
+      categoryId: internalCategoryId || categoryDocId,
+      categoryDocId,
       categoryName,
       images: body.images || [],
       attributes: body.attributes || [],
@@ -66,10 +68,10 @@ export async function POST(req: NextRequest) {
     await docRef.set(productData);
 
     // Increment category productCount
-    if (productData.categoryDocId) {
+    if (categoryDocId) {
       await adminDb
         .collection("categories")
-        .doc(productData.categoryDocId)
+        .doc(categoryDocId)
         .update({ productCount: FieldValue.increment(1) })
         .catch(() => { });
     }
@@ -90,14 +92,27 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Product ID required" }, { status: 400 });
     }
 
+    const oldProductDoc = await adminDb.collection("products").doc(id).get();
+    const oldData = oldProductDoc.data();
+
     // Resolve new category details if categoryId changed
     if (updateData.categoryId) {
       const catDoc = await adminDb.collection("categories").doc(updateData.categoryId).get();
       if (catDoc.exists) {
         const catData = catDoc.data();
+        const newCategoryDocId = updateData.categoryId;
+        const newCategoryId = catData?.categoryId || catDoc.id;
+
         updateData.categoryName = catData?.name || "";
-        updateData.categoryDocId = updateData.categoryId; // Store doc ID for internal reference
-        updateData.categoryId = catData?.categoryId || updateData.categoryId; // Use internal string ID
+        updateData.categoryDocId = newCategoryDocId;
+        updateData.categoryId = newCategoryId;
+
+        // If category changed, update product counts
+        const oldCatDocId = oldData?.categoryDocId || oldData?.categoryId;
+        if (oldCatDocId && oldCatDocId !== newCategoryDocId) {
+          await adminDb.collection("categories").doc(oldCatDocId).update({ productCount: FieldValue.increment(-1) }).catch(() => {});
+          await adminDb.collection("categories").doc(newCategoryDocId).update({ productCount: FieldValue.increment(1) }).catch(() => {});
+        }
       }
     }
 
@@ -120,14 +135,14 @@ export async function DELETE(req: NextRequest) {
     }
 
     const productDoc = await adminDb.collection("products").doc(id).get();
-    const categoryId = productDoc.data()?.categoryId;
+    const catDocId = productDoc.data()?.categoryDocId || productDoc.data()?.categoryId;
 
     await adminDb.collection("products").doc(id).delete();
 
-    if (categoryId || productDoc.data()?.categoryDocId) {
+    if (catDocId) {
       await adminDb
         .collection("categories")
-        .doc(productDoc.data()?.categoryDocId || categoryId)
+        .doc(catDocId)
         .update({ productCount: FieldValue.increment(-1) })
         .catch(() => { });
     }
